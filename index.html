@@ -159,7 +159,7 @@ a.chip{text-decoration:none;display:inline-block}
         <select id="optCount"><option value="0">전체</option><option value="3">3곡</option><option value="5">5곡</option><option value="10">10곡</option></select></label>
       <label for="optLen">재생 길이
         <select id="optLen"><option value="5">5초</option><option value="7">7초</option><option value="10">10초</option><option value="15">15초</option></select></label>
-      <label for="optShuffle"><input type="checkbox" id="optShuffle"> 순서 섞기</label>
+      <span>노래는 매 판 랜덤으로 나오고, 전체를 한 바퀴 다 돌 때까지 같은 곡이 다시 안 나와요.</span>
     </div>
     <div class="lbls"><span>#</span><span>가수</span><span>제목</span><span>힌트 (비우면 초성)</span><span>유튜브 링크</span><span>시작 (분:초)</span></div>
     <div class="list" id="list"></div>
@@ -181,20 +181,38 @@ a.chip{text-decoration:none;display:inline-block}
 (() => {
 /* ---------------- data ---------------- */
 const DEFAULT_SONGS = [
-  ["IVE","BANG BANG","4세대 걸그룹, 올해 봄 멜론 1위 40일","https://www.youtube.com/watch?v=aIPeHMsiZnw"],
-  ["AKMU","기쁨, 슬픔, 아름다운 마음","남매 듀오",""],
-  ["KiiiKiii","404 (New Era)","키키","https://www.youtube.com/watch?v=eldqSNEAVSE"],
-  ["I.O.I","갑자기","10년 만에 돌아온 그룹","https://www.youtube.com/watch?v=Jxgbfc89hNI"],
-  ["RESCENE","LOVE ATTACK","'거제 야호' 역주행","https://www.youtube.com/watch?v=9XttLI0oH0I"],
-  ["Hearts2Hearts","RUDE!","하츠투하츠","https://www.youtube.com/watch?v=F7sGJVUrkjQ"],
-  ["CORTIS","REDRED","신인 보이그룹","https://www.youtube.com/watch?v=U6BDbXIah-Y"],
-  ["ILLIT","It's Me","아일릿","https://www.youtube.com/watch?v=bMhDJ0S0OBA"],
-  ["한로로","사랑하게 될 거야","싱어송라이터","https://www.youtube.com/watch?v=h0KIWaUEIgQ"],
-  ["ROSÉ & Bruno Mars","APT.","술자리 게임 이름","https://www.youtube.com/watch?v=ekr2nIex040"],
-  ["WOODZ","Drowning","역주행으로 2025 연간 1위","https://www.youtube.com/watch?v=YWJZfyxz-b0"],
-  ["AKMU","소문의 낙원","남매 듀오의 또 다른 곡","https://www.youtube.com/watch?v=OB8tiDObZ1I"]
-].map(([artist,title,hint,yt],i)=>({id:"d"+i,artist,title,hint:"",yt,start:50,_old:hint}));
-const OLD_HINTS=new Set(DEFAULT_SONGS.map(s=>s._old)); DEFAULT_SONGS.forEach(s=>delete s._old);
+  {id:"d0",artist:"IVE",title:"BANG BANG",hint:"",yt:"https://www.youtube.com/watch?v=aIPeHMsiZnw",start:50},
+  {id:"d2",artist:"KiiiKiii",title:"404 (New Era)",hint:"",yt:"https://www.youtube.com/watch?v=eldqSNEAVSE",start:50},
+  {id:"d3",artist:"I.O.I",title:"갑자기",hint:"",yt:"https://www.youtube.com/watch?v=Jxgbfc89hNI",start:50},
+  {id:"d4",artist:"RESCENE",title:"LOVE ATTACK",hint:"",yt:"https://www.youtube.com/watch?v=9XttLI0oH0I",start:50},
+  {id:"d5",artist:"Hearts2Hearts",title:"RUDE!",hint:"",yt:"https://www.youtube.com/watch?v=F7sGJVUrkjQ",start:50},
+  {id:"d6",artist:"CORTIS",title:"REDRED",hint:"",yt:"https://www.youtube.com/watch?v=U6BDbXIah-Y",start:50},
+  {id:"d7",artist:"ILLIT",title:"It's Me",hint:"",yt:"https://www.youtube.com/watch?v=bMhDJ0S0OBA",start:50},
+  {id:"d8",artist:"한로로",title:"사랑하게 될 거야",hint:"",yt:"https://www.youtube.com/watch?v=h0KIWaUEIgQ",start:50},
+  {id:"d9",artist:"ROSÉ & Bruno Mars",title:"APT.",hint:"",yt:"https://www.youtube.com/watch?v=ekr2nIex040",start:50},
+  {id:"d10",artist:"WOODZ",title:"Drowning",hint:"",yt:"https://www.youtube.com/watch?v=YWJZfyxz-b0",start:50},
+  {id:"d11",artist:"AKMU",title:"소문의 낙원",hint:"",yt:"https://www.youtube.com/watch?v=OB8tiDObZ1I",start:50},
+  {id:"d12",artist:"NewJeans",title:"Hype Boy",hint:"",yt:"https://www.youtube.com/watch?v=11cta61wi0g",start:50},
+  {id:"d13",artist:"NewJeans",title:"Ditto",hint:"",yt:"https://www.youtube.com/watch?v=pSUydWEqKwE",start:50},
+  {id:"d14",artist:"IVE",title:"LOVE DIVE",hint:"",yt:"https://www.youtube.com/watch?v=8AMBslo1zng",start:50},
+  {id:"d15",artist:"IVE",title:"I AM",hint:"",yt:"https://www.youtube.com/watch?v=6ZUIwj3FgUY",start:50},
+  {id:"d16",artist:"aespa",title:"Supernova",hint:"",yt:"https://www.youtube.com/watch?v=Q4EfllhDBEI",start:50},
+  {id:"d17",artist:"aespa",title:"Whiplash",hint:"",yt:"https://www.youtube.com/watch?v=FWwqkXLxwFc",start:50},
+  {id:"d18",artist:"(여자)아이들",title:"퀸카 (Queencard)",hint:"",yt:"https://www.youtube.com/watch?v=7HDeem-JaSY",start:50},
+  {id:"d19",artist:"LE SSERAFIM",title:"ANTIFRAGILE",hint:"",yt:"https://www.youtube.com/watch?v=pyf8cbqyfPs",start:50},
+  {id:"d20",artist:"BLACKPINK",title:"뛰어 (JUMP)",hint:"",yt:"https://www.youtube.com/watch?v=CgCVZdcKcqY",start:50},
+  {id:"d21",artist:"G-DRAGON",title:"HOME SWEET HOME",hint:"",yt:"https://www.youtube.com/watch?v=fLi0EJfi_vg",start:50},
+  {id:"d22",artist:"이무진",title:"에피소드",hint:"",yt:"https://www.youtube.com/watch?v=PVIf531Dt8E",start:50},
+  {id:"d23",artist:"10CM",title:"너에게 닿기를",hint:"",yt:"https://www.youtube.com/watch?v=Ry1RrIVyl1M",start:50},
+  {id:"d24",artist:"JENNIE",title:"like JENNIE",hint:"",yt:"https://www.youtube.com/watch?v=JSFG-IE8n_c",start:50},
+  {id:"d25",artist:"NMIXX",title:"Blue Valentine",hint:"",yt:"https://www.youtube.com/watch?v=EmeW6li6bbo",start:50},
+  {id:"d26",artist:"DAY6",title:"한 페이지가 될 수 있게",hint:"",yt:"https://www.youtube.com/watch?v=vnS_jn2uibs",start:50},
+  {id:"d27",artist:"BTS",title:"SWIM",hint:"",yt:"https://www.youtube.com/watch?v=b4iVv91Z6lY",start:50},
+  {id:"d28",artist:"ILLIT",title:"Magnetic",hint:"",yt:"https://www.youtube.com/watch?v=Vk5-c_v4gMU",start:50},
+  {id:"d29",artist:"BTS",title:"Dynamite",hint:"",yt:"https://www.youtube.com/watch?v=gdZLi9oWNZg",start:50},
+  {id:"d30",artist:"아이유",title:"밤편지",hint:"",yt:"https://www.youtube.com/watch?v=BzYnNdJhZQw",start:50}
+];
+const OLD_HINTS=new Set(["4세대 걸그룹, 올해 봄 멜론 1위 40일","남매 듀오","키키","10년 만에 돌아온 그룹","'거제 야호' 역주행","하츠투하츠","신인 보이그룹","아일릿","싱어송라이터","술자리 게임 이름","역주행으로 2025 연간 1위","남매 듀오의 또 다른 곡"]);
 
 const LS = "songquiz.v2";
 const store = {
@@ -202,7 +220,10 @@ const store = {
   set(v){ try{ localStorage.setItem(LS,JSON.stringify(v)); }catch(e){} }
 };
 let state = store.get() || {songs:DEFAULT_SONGS, count:5, len:10, shuffle:true};
-{ const byId=Object.fromEntries(DEFAULT_SONGS.map(d=>[d.id,d])); (state.songs||[]).forEach(s=>{ if(!s.yt && byId[s.id] && byId[s.id].yt) s.yt=byId[s.id].yt; }); }
+{ const byId=Object.fromEntries(DEFAULT_SONGS.map(d=>[d.id,d]));
+  state.songs=(state.songs||[]).filter(s=>!(s.id==="d1"&&!s.yt));
+  state.songs.forEach(s=>{ if(!s.yt && byId[s.id] && byId[s.id].yt) s.yt=byId[s.id].yt; });
+  const have=new Set(state.songs.map(s=>s.id)); DEFAULT_SONGS.forEach(d=>{ if(!have.has(d.id)) state.songs.push({...d}); }); }
 if(!state.chosungV){ (state.songs||[]).forEach(s=>{ if(OLD_HINTS.has(s.hint)) s.hint=""; }); state.chosungV=1; }
 if(!state.songs) state.songs = DEFAULT_SONGS;
 const save = () => store.set(state);
@@ -511,14 +532,25 @@ function show(name){
   if(!$("counter").hidden) $("counter").textContent = `${idx+1} / ${round.length}`;
   draw(performance.now());
 }
-function buildRound(){
-  let list=state.songs.filter(s=>s.title.trim());
-  if(state.shuffle) list=list.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);
-  if(state.count>0) list=list.slice(0,state.count);
-  round=list; idx=0; correct=0;
+function shuffled(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+async function buildRound(){
+  const files=new Set(await keys());
+  const ok=state.songs.filter(s=>s.title.trim() && (ytId(s.yt)||files.has("a:"+s.id)));
+  const n=state.count>0?Math.min(state.count,ok.length):ok.length;
+  const ids=new Set(ok.map(s=>s.id));
+  let bag=(state.bag||[]).filter(id=>ids.has(id));
+  const pick=[];
+  while(pick.length<n){
+    if(!bag.length) bag=shuffled(ok.map(s=>s.id).filter(id=>!pick.includes(id)));
+    if(!bag.length) break;
+    pick.push(bag.shift());
+  }
+  state.bag=bag; save();
+  const byId=Object.fromEntries(ok.map(s=>[s.id,s]));
+  round=pick.map(id=>byId[id]); idx=0; correct=0;
 }
 function howText(){
-  const n=state.count>0?Math.min(state.count,state.songs.length):state.songs.length;
+  const n=round.length;
   $("howText").innerHTML=`요즘 차트 인기곡이 총 <b>${n}곡</b> 재생됩니다!<br>짧게 재생되는 <b>${state.len}초</b> 구간을 듣고서 정답을 외쳐주세요!`;
 }
 function renderBar(p){ const n=state.len; const on=Math.round(p*n); $("bar").innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join(""); }
@@ -619,7 +651,7 @@ async function playClip(s, onProgress){
 function playToggle(){ if(playing){ stopAudio(); $("status").textContent="멈췄어요"; return; } playClip(round[idx],renderBar); }
 
 /* wiring */
-$("startBtn").onclick=()=>{ buildRound(); howText(); show("how"); };
+$("startBtn").onclick=async()=>{ await buildRound(); howText(); show("how"); };
 $("goBtn").onclick=()=>{ if(!round.length){ $("howText").textContent="노래 목록이 비어 있어요. '노래 설정'에서 추가해 주세요."; return; } showQ(); };
 $("playBtn").onclick=playToggle;
 $("hint").onclick=toggleHint;
@@ -678,11 +710,11 @@ $("fileAudio").onchange=async e=>{ const f=e.target.files[0]; if(f&&pickFor){ aw
 $("fileImg").onchange=async e=>{ const f=e.target.files[0]; if(f&&pickFor){ await putFile("i:"+pickFor.id,f); renderList(); } };
 $("addBtn").onclick=()=>{ state.songs.push({id:"s"+Date.now().toString(36),artist:"",title:"",hint:"",yt:"",start:45}); save(); renderList().then(()=>{ const r=$("list").lastElementChild; r&&r.querySelector("input").focus(); }); };
 $("resetBtn").onclick=e=>{ const b=e.currentTarget; if(!b.dataset.confirm){ b.dataset.confirm="1"; b.textContent="한 번 더 누르면 초기화"; setTimeout(()=>{delete b.dataset.confirm; b.textContent="기본 목록으로";},2500); return; }
-  delete b.dataset.confirm; b.textContent="기본 목록으로"; state.songs=JSON.parse(JSON.stringify(DEFAULT_SONGS)); save(); renderList(); };
+  delete b.dataset.confirm; b.textContent="기본 목록으로"; state.songs=JSON.parse(JSON.stringify(DEFAULT_SONGS)); state.bag=[]; save(); renderList(); };
 $("optCount").onchange=e=>{ state.count=+e.target.value; save(); };
 $("optLen").onchange=e=>{ state.len=+e.target.value; save(); };
-$("optShuffle").onchange=e=>{ state.shuffle=e.target.checked; save(); };
-function openSetup(){ stopAudio(); $("optCount").value=String(state.count); $("optLen").value=String(state.len); $("optShuffle").checked=!!state.shuffle; renderList(); $("setup").hidden=false; $("closeSetup").focus(); }
+
+function openSetup(){ stopAudio(); $("optCount").value=String(state.count); $("optLen").value=String(state.len); renderList(); $("setup").hidden=false; $("closeSetup").focus(); }
 $("setupBtn").onclick=openSetup;
 $("closeSetup").onclick=()=>{ stopAudio(); $("setupMsg").textContent=""; $("setup").hidden=true; show("title"); };
 $("setup").addEventListener("keydown",e=>{ if(e.key==="Escape") $("closeSetup").click(); });
