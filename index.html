@@ -121,7 +121,7 @@ a.chip{text-decoration:none;display:inline-block}
       <div class="bar" id="bar"></div>
       <p class="status" id="status"></p>
     </div>
-    <button class="bubble" id="hint" type="button" data-open="0">힌트 보기</button>
+    <button class="bubble" id="hint" type="button" data-open="0">초성 힌트 보기</button>
     <div class="row" style="margin-top:14px">
       <button class="btn ghost" id="revealBtn" type="button">정답 공개</button>
     </div>
@@ -137,20 +137,18 @@ a.chip{text-decoration:none;display:inline-block}
     </div>
     <div class="row" style="margin-top:8px">
       <button class="btn ghost" id="againBtn" type="button">다시 듣기</button>
-      <button class="btn ok" id="rightBtn" type="button">맞혔어요 O</button>
-      <button class="btn" id="wrongBtn" type="button">틀렸어요 X</button>
+      <button class="btn" id="nextBtn" type="button">다음 문제</button>
     </div>
   </section>
 
   <section class="screen" id="s-end" hidden>
     <h2 class="h2">게임 끝!</h2>
     <p class="score" id="scoreText"></p>
-    <p class="body" id="scoreMsg"></p>
     <button class="btn" id="homeBtn" type="button">처음으로</button>
   </section>
 </main>
 
-<div class="keys" id="keys">스페이스 재생 · H 힌트 · 엔터 정답/다음 · F 전체화면</div>
+<div class="keys" id="keys">스페이스 재생 · H 초성 · 엔터 정답/다음 · F 전체화면</div>
 
 <div class="setup" id="setup" hidden role="dialog" aria-labelledby="setupTitle">
   <div class="panel">
@@ -163,7 +161,7 @@ a.chip{text-decoration:none;display:inline-block}
         <select id="optLen"><option value="5">5초</option><option value="7">7초</option><option value="10">10초</option><option value="15">15초</option></select></label>
       <label for="optShuffle"><input type="checkbox" id="optShuffle"> 순서 섞기</label>
     </div>
-    <div class="lbls"><span>#</span><span>가수</span><span>제목</span><span>힌트</span><span>유튜브 링크</span><span>시작(초)</span></div>
+    <div class="lbls"><span>#</span><span>가수</span><span>제목</span><span>힌트 (비우면 초성)</span><span>유튜브 링크</span><span>시작(초)</span></div>
     <div class="list" id="list"></div>
     <p id="setupMsg" role="status"></p>
     <div class="foot">
@@ -195,7 +193,8 @@ const DEFAULT_SONGS = [
   ["ROSÉ & Bruno Mars","APT.","술자리 게임 이름","https://www.youtube.com/watch?v=ekr2nIex040"],
   ["WOODZ","Drowning","역주행으로 2025 연간 1위",""],
   ["AKMU","소문의 낙원","남매 듀오의 또 다른 곡",""]
-].map(([artist,title,hint,yt],i)=>({id:"d"+i,artist,title,hint,yt,start:50}));
+].map(([artist,title,hint,yt],i)=>({id:"d"+i,artist,title,hint:"",yt,start:50,_old:hint}));
+const OLD_HINTS=new Set(DEFAULT_SONGS.map(s=>s._old)); DEFAULT_SONGS.forEach(s=>delete s._old);
 
 const LS = "songquiz.v2";
 const store = {
@@ -203,6 +202,7 @@ const store = {
   set(v){ try{ localStorage.setItem(LS,JSON.stringify(v)); }catch(e){} }
 };
 let state = store.get() || {songs:DEFAULT_SONGS, count:5, len:10, shuffle:true};
+if(!state.chosungV){ (state.songs||[]).forEach(s=>{ if(OLD_HINTS.has(s.hint)) s.hint=""; }); state.chosungV=1; }
 if(!state.songs) state.songs = DEFAULT_SONGS;
 const save = () => store.set(state);
 
@@ -507,7 +507,7 @@ function show(name){
   screens.forEach(s=>$("s-"+s).hidden = s!==name);
   scene = name==="title"?"title":name==="how"?"how":name==="q"?"q":"a";
   $("counter").hidden = !(name==="q"||name==="a");
-  if(!$("counter").hidden) $("counter").textContent = `${idx+1} / ${round.length}  ·  정답 ${correct}`;
+  if(!$("counter").hidden) $("counter").textContent = `${idx+1} / ${round.length}`;
   draw(performance.now());
 }
 function buildRound(){
@@ -518,14 +518,14 @@ function buildRound(){
 }
 function howText(){
   const n=state.count>0?Math.min(state.count,state.songs.length):state.songs.length;
-  $("howText").innerHTML=`요즘 차트 인기곡이 총 <b>${n}곡</b> 재생됩니다!<br>짧게 재생되는 <b>${state.len}초</b> 구간을 듣고서 정답을 맞춰주세요!`;
+  $("howText").innerHTML=`요즘 차트 인기곡이 총 <b>${n}곡</b> 재생됩니다!<br>짧게 재생되는 <b>${state.len}초</b> 구간을 듣고서 정답을 외쳐주세요!`;
 }
 function renderBar(p){ const n=state.len; const on=Math.round(p*n); $("bar").innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join(""); }
 function setPlayIcon(playing){ $("playIcon").setAttribute("d", playing? "M2 2h1v4h-1z M5 2h1v4h-1z" : "M2 1h1v6h-1z M3 2h1v4h-1z M4 3h1v2h-1z"); $("playBtn").setAttribute("aria-label",playing?"멈추기":"하이라이트 재생"); }
 async function showQ(){
   const s=round[idx]; hintOpen=false;
   $("qNum").textContent=idx+1;
-  const h=$("hint"); h.dataset.open="0"; h.textContent="힌트 보기";
+  const h=$("hint"); h.dataset.open="0"; h.textContent="초성 힌트 보기";
   renderBar(0); setPlayIcon(false);
   show("q");
   const id=ytId(s.yt);
@@ -533,7 +533,14 @@ async function showQ(){
   const f=id?null:await getFile("a:"+s.id);
   $("status").textContent = (id||f)? "재생 버튼(스페이스)을 누르면 노래가 나와요" : "이 노래는 유튜브 링크가 없어요 · 오른쪽 위 '노래 설정'에서 넣어주세요";
 }
-function toggleHint(){ const s=round[idx]; hintOpen=!hintOpen; const h=$("hint"); h.dataset.open=hintOpen?"1":"0"; h.textContent=hintOpen? "힌트: "+(s.hint||s.artist) : "힌트 보기"; }
+const CHO="ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
+function chosung(t){ return String(t).split(/(\s+)/).map(w=>{ if(/^\s+$/.test(w)) return "  ";
+  let out="", latin=0; for(const ch of w){ const c=ch.charCodeAt(0);
+    if(c>=0xAC00&&c<=0xD7A3){ out+=CHO[Math.floor((c-0xAC00)/588)]; latin=0; }
+    else if(/[A-Za-z]/.test(ch)){ out+= latin? "_" : ch.toUpperCase(); latin=1; }
+    else { out+=ch; latin=0; } } return out; }).join(""); }
+function hintText(s){ return (s.hint&&s.hint.trim())? s.hint : chosung(s.title); }
+function toggleHint(){ const s=round[idx]; hintOpen=!hintOpen; const h=$("hint"); h.dataset.open=hintOpen?"1":"0"; h.textContent=hintOpen? "초성: "+hintText(s) : "초성 힌트 보기"; }
 async function showA(){
   const s=round[idx];
   $("aArtist").textContent=s.artist; $("aTitle").textContent=s.title;
@@ -542,12 +549,10 @@ async function showA(){
   if(img){ const el=new Image(); el.alt=s.artist; el.src=URL.createObjectURL(img); cov.appendChild(el); } else cov.appendChild(vinyl());
   show("a");
 }
-function next(ok){ if(ok) correct++; idx++; if(idx>=round.length) end(); else showQ(); }
+function next(){ idx++; if(idx>=round.length) end(); else showQ(); }
 function end(){
   show("end");
-  const n=round.length; $("scoreText").textContent=`${n}곡 중 ${correct}곡 정답!`;
-  const r=n?correct/n:0;
-  $("scoreMsg").textContent = r===1?"완벽해요! 오늘의 음악 천재 인정":r>=.7?"대단해요! 차트를 꿰고 있네요":r>=.4?"좋아요! 귀가 꽤 좋은데요?":"괜찮아요, 한 판 더 해볼까요?";
+  $("scoreText").textContent=`${round.length}곡 모두 끝! 참여해 주셔서 고마워요`;
 }
 
 /* audio: YouTube first, local file as fallback */
@@ -619,8 +624,7 @@ $("playBtn").onclick=playToggle;
 $("hint").onclick=toggleHint;
 $("revealBtn").onclick=showA;
 $("againBtn").onclick=()=>{ if(playing) stopAudio(); else playClip(round[idx]); };
-$("rightBtn").onclick=()=>next(true);
-$("wrongBtn").onclick=()=>next(false);
+$("nextBtn").onclick=()=>next();
 $("homeBtn").onclick=()=>show("title");
 $("fsBtn").onclick=()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
 document.addEventListener("fullscreenchange",()=>{ $("fsBtn").textContent=document.fullscreenElement?"전체화면 끄기":"전체화면"; });
@@ -628,9 +632,7 @@ document.addEventListener("keydown",e=>{
   if(!$("setup").hidden || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   if(e.code==="Space"){ e.preventDefault(); if(current==="q") playToggle(); else if(current==="a") $("againBtn").click(); }
   else if(e.key==="h"||e.key==="H"||e.key==="ㅗ"){ if(current==="q") toggleHint(); }
-  else if(e.key==="Enter"){ e.preventDefault(); if(current==="title") $("startBtn").click(); else if(current==="how") $("goBtn").click(); else if(current==="q") showA(); else if(current==="end") show("title"); }
-  else if(current==="a" && (e.key==="o"||e.key==="O"||e.key==="ㅐ")) next(true);
-  else if(current==="a" && (e.key==="x"||e.key==="X"||e.key==="ㅌ")) next(false);
+  else if(e.key==="Enter"){ e.preventDefault(); if(current==="title") $("startBtn").click(); else if(current==="how") $("goBtn").click(); else if(current==="q") showA(); else if(current==="a") next(); else if(current==="end") show("title"); }
   else if(e.key==="f"||e.key==="F"||e.key==="ㄹ"){ $("fsBtn").click(); }
   else if(e.key==="Escape" && !document.fullscreenElement){ show("title"); }
 });
@@ -645,7 +647,7 @@ async function renderList(){
       <span class="n">${i+1}</span>
       <input type="text" id="ar-${s.id}" data-k="artist" value="${esc(s.artist)}" aria-label="가수">
       <input type="text" id="ti-${s.id}" data-k="title" value="${esc(s.title)}" aria-label="제목">
-      <input type="text" id="hi-${s.id}" data-k="hint" value="${esc(s.hint)}" aria-label="힌트">
+      <input type="text" id="hi-${s.id}" data-k="hint" value="${esc(s.hint)}" placeholder="${esc(chosung(s.title))}" aria-label="힌트">
       <input type="text" id="yt-${s.id}" data-k="yt" value="${esc(s.yt||"")}" placeholder="youtube.com/watch?v=…" aria-label="유튜브 링크">
       <input type="number" id="st-${s.id}" data-k="start" value="${s.start}" min="0" step="1" aria-label="시작 초">
       <div class="tools">
