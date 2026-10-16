@@ -73,7 +73,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--pixel);overflow:
 .panel select,.panel input[type=text],.panel input[type=number]{font-family:var(--pixel);font-size:14px;background:#0b0833;color:var(--ink);border:2px solid var(--panel-line);padding:6px 8px;min-width:0;width:100%}
 .panel input:focus,.panel select:focus{outline:none;border-color:var(--gold)}
 .list{display:flex;flex-direction:column;gap:8px}
-.song{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.3fr) 64px;gap:8px;align-items:center;padding:8px;background:#0e0a3a;border:2px solid #241c6b}
+.song{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.3fr) 70px;gap:8px;align-items:center;padding:8px;background:#0e0a3a;border:2px solid #241c6b}
 .song .n{font-size:14px;color:var(--gold);text-align:center}
 .song .tools{display:flex;gap:6px;flex-wrap:wrap;grid-column:2/-1}
 a.chip{text-decoration:none;display:inline-block}
@@ -82,7 +82,7 @@ a.chip{text-decoration:none;display:inline-block}
 .chip:hover{background:#3b2f8f}
 .chip.has{background:#145a3c}
 .chip.del{background:transparent;color:#ff8b9b}
-.lbls{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.3fr) 64px;gap:8px;padding:0 10px;font-size:12px;color:var(--lilac)}
+.lbls{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.3fr) 70px;gap:8px;padding:0 10px;font-size:12px;color:var(--lilac)}
 .foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:16px}
 #ytbox{position:fixed;left:0;bottom:0;width:200px;height:200px;z-index:-1;opacity:0;pointer-events:none}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -153,7 +153,7 @@ a.chip{text-decoration:none;display:inline-block}
 <div class="setup" id="setup" hidden role="dialog" aria-labelledby="setupTitle">
   <div class="panel">
     <h2 id="setupTitle">노래 설정</h2>
-    <p>노래마다 유튜브 링크를 붙여넣고, 하이라이트(후렴)가 시작되는 시간을 초 단위로 적어주세요. "찾기"를 누르면 유튜브 검색이 새 탭으로 열려요. 미리 채워둔 링크와 시작 시간은 대략이라 "미리 듣기"로 꼭 확인해 주세요. 인터넷이 없을 때를 대비해 음원 파일을 넣어둘 수도 있어요 (링크가 비어 있으면 파일로 재생돼요). 설정은 이 노트북 브라우저에 저장돼요.</p>
+    <p>노래마다 유튜브 링크를 붙여넣고, 하이라이트(후렴)가 시작되는 시간을 "1:05"처럼 분:초로 적어주세요. "찾기"를 누르면 유튜브 검색이 새 탭으로 열려요. 미리 채워둔 링크와 시작 시간은 대략이라 "미리 듣기"로 꼭 확인해 주세요. 인터넷이 없을 때를 대비해 음원 파일을 넣어둘 수도 있어요 (링크가 비어 있으면 파일로 재생돼요). 설정은 이 노트북 브라우저에 저장돼요.</p>
     <div class="opts">
       <label for="optCount">한 판 문제 수
         <select id="optCount"><option value="0">전체</option><option value="3">3곡</option><option value="5">5곡</option><option value="10">10곡</option></select></label>
@@ -161,7 +161,7 @@ a.chip{text-decoration:none;display:inline-block}
         <select id="optLen"><option value="5">5초</option><option value="7">7초</option><option value="10">10초</option><option value="15">15초</option></select></label>
       <label for="optShuffle"><input type="checkbox" id="optShuffle"> 순서 섞기</label>
     </div>
-    <div class="lbls"><span>#</span><span>가수</span><span>제목</span><span>힌트 (비우면 초성)</span><span>유튜브 링크</span><span>시작(초)</span></div>
+    <div class="lbls"><span>#</span><span>가수</span><span>제목</span><span>힌트 (비우면 초성)</span><span>유튜브 링크</span><span>시작 (분:초)</span></div>
     <div class="list" id="list"></div>
     <p id="setupMsg" role="status"></p>
     <div class="foot">
@@ -181,18 +181,18 @@ a.chip{text-decoration:none;display:inline-block}
 (() => {
 /* ---------------- data ---------------- */
 const DEFAULT_SONGS = [
-  ["IVE","BANG BANG","4세대 걸그룹, 올해 봄 멜론 1위 40일",""],
+  ["IVE","BANG BANG","4세대 걸그룹, 올해 봄 멜론 1위 40일","https://www.youtube.com/watch?v=aIPeHMsiZnw"],
   ["AKMU","기쁨, 슬픔, 아름다운 마음","남매 듀오",""],
-  ["KiiiKiii","404 (New Era)","키키",""],
+  ["KiiiKiii","404 (New Era)","키키","https://www.youtube.com/watch?v=eldqSNEAVSE"],
   ["I.O.I","갑자기","10년 만에 돌아온 그룹","https://www.youtube.com/watch?v=Jxgbfc89hNI"],
   ["RESCENE","LOVE ATTACK","'거제 야호' 역주행","https://www.youtube.com/watch?v=9XttLI0oH0I"],
   ["Hearts2Hearts","RUDE!","하츠투하츠","https://www.youtube.com/watch?v=F7sGJVUrkjQ"],
   ["CORTIS","REDRED","신인 보이그룹","https://www.youtube.com/watch?v=U6BDbXIah-Y"],
-  ["ILLIT","It's Me","아일릿",""],
-  ["한로로","사랑하게 될 거야","싱어송라이터",""],
+  ["ILLIT","It's Me","아일릿","https://www.youtube.com/watch?v=bMhDJ0S0OBA"],
+  ["한로로","사랑하게 될 거야","싱어송라이터","https://www.youtube.com/watch?v=h0KIWaUEIgQ"],
   ["ROSÉ & Bruno Mars","APT.","술자리 게임 이름","https://www.youtube.com/watch?v=ekr2nIex040"],
-  ["WOODZ","Drowning","역주행으로 2025 연간 1위",""],
-  ["AKMU","소문의 낙원","남매 듀오의 또 다른 곡",""]
+  ["WOODZ","Drowning","역주행으로 2025 연간 1위","https://www.youtube.com/watch?v=YWJZfyxz-b0"],
+  ["AKMU","소문의 낙원","남매 듀오의 또 다른 곡","https://www.youtube.com/watch?v=OB8tiDObZ1I"]
 ].map(([artist,title,hint,yt],i)=>({id:"d"+i,artist,title,hint:"",yt,start:50,_old:hint}));
 const OLD_HINTS=new Set(DEFAULT_SONGS.map(s=>s._old)); DEFAULT_SONGS.forEach(s=>delete s._old);
 
@@ -202,6 +202,7 @@ const store = {
   set(v){ try{ localStorage.setItem(LS,JSON.stringify(v)); }catch(e){} }
 };
 let state = store.get() || {songs:DEFAULT_SONGS, count:5, len:10, shuffle:true};
+{ const byId=Object.fromEntries(DEFAULT_SONGS.map(d=>[d.id,d])); (state.songs||[]).forEach(s=>{ if(!s.yt && byId[s.id] && byId[s.id].yt) s.yt=byId[s.id].yt; }); }
 if(!state.chosungV){ (state.songs||[]).forEach(s=>{ if(OLD_HINTS.has(s.hint)) s.hint=""; }); state.chosungV=1; }
 if(!state.songs) state.songs = DEFAULT_SONGS;
 const save = () => store.set(state);
@@ -638,6 +639,8 @@ document.addEventListener("keydown",e=>{
 });
 
 /* setup panel */
+function parseT(v){ v=String(v).trim(); const m=v.match(/^(\d+)[:분\.](\d{1,2})초?$/); if(m) return (+m[1])*60+(+m[2]); const n=parseFloat(v); return isFinite(n)&&n>0?Math.round(n):0; }
+function fmtT(n){ n=Math.max(0,Math.round(+n||0)); return Math.floor(n/60)+":"+String(n%60).padStart(2,"0"); }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let have=new Set(), pickFor=null;
 async function renderList(){
@@ -649,7 +652,7 @@ async function renderList(){
       <input type="text" id="ti-${s.id}" data-k="title" value="${esc(s.title)}" aria-label="제목">
       <input type="text" id="hi-${s.id}" data-k="hint" value="${esc(s.hint)}" placeholder="${esc(chosung(s.title))}" aria-label="힌트">
       <input type="text" id="yt-${s.id}" data-k="yt" value="${esc(s.yt||"")}" placeholder="youtube.com/watch?v=…" aria-label="유튜브 링크">
-      <input type="number" id="st-${s.id}" data-k="start" value="${s.start}" min="0" step="1" aria-label="시작 초">
+      <input type="text" id="st-${s.id}" data-k="start" value="${fmtT(s.start)}" placeholder="1:05" aria-label="시작 시간">
       <div class="tools">
         <a class="chip" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent((s.artist+" "+s.title+" MV").trim())}">찾기</a>
         <button class="chip" data-act="test" type="button">미리 듣기</button>
@@ -659,7 +662,7 @@ async function renderList(){
       </div>
     </div>`).join("");
 }
-$("list").addEventListener("input",e=>{ const row=e.target.closest(".song"); if(!row) return; const s=state.songs[+row.dataset.i]; const k=e.target.dataset.k; s[k]= k==="start"? Math.max(0,+e.target.value||0) : e.target.value; save(); });
+$("list").addEventListener("input",e=>{ const row=e.target.closest(".song"); if(!row) return; const s=state.songs[+row.dataset.i]; const k=e.target.dataset.k; s[k]= k==="start"? parseT(e.target.value) : e.target.value; save(); });
 $("list").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b) return; const row=b.closest(".song"); const s=state.songs[+row.dataset.i];
   const act=b.dataset.act;
