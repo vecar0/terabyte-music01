@@ -185,7 +185,7 @@ a.chip{text-decoration:none;display:inline-block}
 <div class="setup" id="setup" hidden role="dialog" aria-labelledby="setupTitle">
   <div class="panel">
     <h2 id="setupTitle">노래 설정</h2>
-    <p>노래마다 유튜브 링크를 붙여넣고, 하이라이트(후렴)가 시작되는 시간을 "1:05"처럼 분:초로 적어주세요. "찾기"를 누르면 유튜브 검색이 새 탭으로 열려요. 미리 채워둔 링크와 시작 시간은 대략이라 "미리 듣기"로 꼭 확인해 주세요. 인터넷이 없을 때를 대비해 음원 파일을 넣어둘 수도 있어요 (링크가 비어 있으면 파일로 재생돼요). 설정은 이 노트북 브라우저에 저장돼요.</p>
+    <p>노래마다 유튜브 링크를 붙여넣고, 하이라이트(후렴)가 시작되는 시간을 "1:05"처럼 분:초로 적어주세요. "찾기"를 누르면 유튜브 검색이 새 탭으로 열려요. 미리 채워둔 링크와 시작 시간은 대략이라 "미리 듣기"로 꼭 확인해 주세요. "자동 찾기"를 누르면 유튜브에서 사람들이 가장 많이 다시 본 구간으로 시작 시간을 맞춰줘요. 인터넷이 없을 때를 대비해 음원 파일을 넣어둘 수도 있어요 (링크가 비어 있으면 파일로 재생돼요). 설정은 이 노트북 브라우저에 저장돼요.</p>
     <div class="opts">
       <label for="optCount">한 판 문제 수
         <select id="optCount"><option value="0">전체</option><option value="3">3곡</option><option value="5">5곡</option><option value="10">10곡</option></select></label>
@@ -200,7 +200,10 @@ a.chip{text-decoration:none;display:inline-block}
     <div class="list" id="list"></div>
     <p id="setupMsg" role="status"></p>
     <div class="foot">
-      <button class="chip" id="addBtn" type="button">+ 노래 추가</button>
+      <div class="row" style="justify-content:flex-start;gap:8px">
+        <button class="chip" id="addBtn" type="button">+ 노래 추가</button>
+        <button class="chip" id="autoAll" type="button">전체 하이라이트 자동 찾기</button>
+      </div>
       <div class="row">
         <button class="chip" id="resetBtn" type="button">기본 목록으로</button>
         <button class="btn" id="closeSetup" type="button">완료</button>
@@ -733,6 +736,36 @@ function parseT(v){ v=String(v).trim(); const m=v.match(/^(\d+)[:분\.](\d{1,2})
 function fmtT(n){ n=Math.max(0,Math.round(+n||0)); return Math.floor(n/60)+":"+String(n%60).padStart(2,"0"); }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let have=new Set(), pickFor=null;
+/* YouTube "most replayed" peak via a public third-party API (best effort) */
+async function mostReplayed(id){
+  const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),9000);
+  try{
+    const r=await fetch("https://yt.lemnoslife.com/videos?part=mostReplayed&id="+id,{signal:ctl.signal});
+    if(!r.ok) return null;
+    const j=await r.json(); const mr=j&&j.items&&j.items[0]&&j.items[0].mostReplayed; if(!mr) return null;
+    let marks=[];
+    if(Array.isArray(mr.markers)) marks=mr.markers.map(m=>({t:+m.startMillis,v:+(m.intensityScoreNormalized??0)}));
+    else if(Array.isArray(mr.heatMarkers)) marks=mr.heatMarkers.map(m=>{ const h=m.heatMarkerRenderer||m; return {t:+h.timeRangeStartMillis,v:+(h.heatMarkerIntensityScoreNormalized??0)}; });
+    marks=marks.filter(m=>isFinite(m.t)&&m.t>=5000);
+    if(!marks.length) return null;
+    const best=marks.reduce((a,b)=>b.v>a.v?b:a);
+    return Math.max(0,Math.floor(best.t/1000)-1);
+  }catch(e){ return null; } finally{ clearTimeout(t); }
+}
+async function autoFind(s){
+  const id=ytId(s.yt); if(!id) return {ok:false,why:"유튜브 링크가 없어요"};
+  msg(`${s.artist} - ${s.title}: 찾는 중…`);
+  const sec=await mostReplayed(id);
+  if(sec==null) return {ok:false,why:"자동으로 못 찾았어요 (데이터가 없거나 서비스 연결 실패) · 직접 적어주세요"};
+  s.start=sec; save(); return {ok:true};
+}
+$("autoAll").onclick=async e=>{
+  const b=e.currentTarget; if(b.dataset.busy) return; b.dataset.busy="1";
+  let ok=0, fail=[];
+  for(let i=0;i<state.songs.length;i++){ const s=state.songs[i]; b.textContent=`찾는 중… ${i+1}/${state.songs.length}`; const r=await autoFind(s); if(r.ok) ok++; else fail.push(s.title); }
+  delete b.dataset.busy; b.textContent="전체 하이라이트 자동 찾기"; renderList();
+  msg(`${ok}곡 자동으로 맞췄어요.`+(fail.length?` 못 찾은 곡: ${fail.join(", ")} · 직접 적어주세요`:""));
+};
 async function renderList(){
   have=new Set(await keys());
   $("list").innerHTML=state.songs.map((s,i)=>`
@@ -745,6 +778,7 @@ async function renderList(){
       <input type="text" id="st-${s.id}" data-k="start" value="${fmtT(s.start)}" placeholder="1:05" aria-label="시작 시간">
       <div class="tools">
         <a class="chip" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent((s.artist+" "+s.title+" MV").trim())}">찾기</a>
+        <button class="chip" data-act="auto" type="button">자동 찾기</button>
         <button class="chip" data-act="test" type="button">미리 듣기</button>
         <button class="chip ${have.has("a:"+s.id)?"has":""}" data-act="audio" type="button">${have.has("a:"+s.id)?"음원 파일 ✓":"음원 파일"}</button>
         <button class="chip ${have.has("i:"+s.id)?"has":""}" data-act="img" type="button">${have.has("i:"+s.id)?"사진 ✓":"사진"}</button>
@@ -758,6 +792,7 @@ $("list").addEventListener("click",e=>{
   const act=b.dataset.act;
   if(act==="audio"){ pickFor=s; $("fileAudio").value=""; $("fileAudio").click(); }
   else if(act==="img"){ pickFor=s; $("fileImg").value=""; $("fileImg").click(); }
+  else if(act==="auto"){ autoFind(s).then(r=>{ msg(r.ok?`${s.artist} - ${s.title}: 가장 많이 다시 본 구간 ${fmtT(s.start)}로 맞췄어요`:`${s.artist} - ${s.title}: ${r.why}`); if(r.ok) renderList(); }); }
   else if(act==="test"){ if(playing&&b.textContent==="멈추기"){ stopAudio(); b.textContent="미리 듣기"; msg(""); return; } $("list").querySelectorAll('[data-act="test"]').forEach(x=>x.textContent="미리 듣기"); b.textContent="멈추기"; activeStage=0; clipSec=state.len2; playClip(s,p=>{ if(p>=1) b.textContent="미리 듣기"; }); }
   else if(act==="del"){
     if(b.dataset.confirm){ delFile("a:"+s.id); delFile("i:"+s.id); state.songs.splice(+row.dataset.i,1); save(); renderList(); }
