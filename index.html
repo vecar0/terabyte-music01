@@ -76,8 +76,13 @@ body{background:var(--night);color:var(--ink);font-family:var(--pixel);overflow:
 .panel{max-width:1100px;margin:0 auto;background:var(--panel);box-shadow:0 0 0 3px var(--panel-line),8px 8px 0 3px #000;padding:20px;text-align:left}
 .panel h2{margin:0 0 6px;font-size:24px;font-weight:400}
 .panel p{margin:0 0 14px;font-size:13px;line-height:1.7;color:var(--lilac)}
-.opts{display:flex;flex-wrap:wrap;gap:16px;margin:0 0 16px;font-size:14px;align-items:center}
-.opts label{display:flex;gap:8px;align-items:center}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:0 0 12px;font-size:14px}
+.opts fieldset{border:2px solid var(--panel-line);margin:0;padding:10px 12px 12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-width:0}
+.opts legend{padding:0 6px;color:var(--gold);font-size:13px}
+.opts label{display:flex;gap:6px;align-items:center;white-space:nowrap}
+.opts input[type=number]{width:72px}
+.quick{display:flex;gap:4px}
+.note{font-size:12px;color:var(--lilac);line-height:1.5}
 .panel select,.panel input[type=text],.panel input[type=number]{font-family:var(--pixel);font-size:14px;background:#0b0833;color:var(--ink);border:2px solid var(--panel-line);padding:6px 8px;min-width:0;width:100%}
 .panel input:focus,.panel select:focus{outline:none;border-color:var(--gold)}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -106,12 +111,12 @@ a.chip{text-decoration:none;display:inline-block}
   .lis{font-size:min(2vw,4.4vh);padding:.4em .9em}
   .points{font-size:min(2.2vw,5vh)}
   .bubble{font-size:min(2vw,4.4vh);padding:.4em 1.2em}
-  .cover{width:min(22vw,40vh)}
+  .cover{width:min(22vw,34vh)}
   .ans-text .title{font-size:min(5vw,11vh)}
   .keys{display:none}
 }
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-@media (max-width:760px){.song,.lbls{grid-template-columns:28px minmax(0,1fr) minmax(0,1fr)}.lbls{display:none}.song .tools{grid-column:1/-1}}
+@media (max-width:760px){.song,.lbls{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.lbls{display:none}.song .n{grid-column:1/-1;text-align:left}.song .tools{grid-column:1/-1}.keys{display:none}}
 @media (prefers-reduced-motion:reduce){.btn,.play{transition:none}}
 </style>
 </head>
@@ -187,15 +192,27 @@ a.chip{text-decoration:none;display:inline-block}
     <h2 id="setupTitle">노래 설정</h2>
     <p>노래마다 유튜브 링크를 붙여넣고, 하이라이트(후렴)가 시작되는 시간을 "1:05"처럼 분:초로 적어주세요. "찾기"를 누르면 유튜브 검색이 새 탭으로 열려요. 미리 채워둔 링크와 시작 시간은 대략이라 "미리 듣기"로 꼭 확인해 주세요. "자동 찾기"를 누르면 유튜브에서 사람들이 가장 많이 다시 본 구간으로 시작 시간을 맞춰줘요. 인터넷이 없을 때를 대비해 음원 파일을 넣어둘 수도 있어요 (링크가 비어 있으면 파일로 재생돼요). 설정은 이 노트북 브라우저에 저장돼요.</p>
     <div class="opts">
-      <label for="optCount">한 판 문제 수
-        <select id="optCount"><option value="0">전체</option><option value="3">3곡</option><option value="5">5곡</option><option value="10">10곡</option></select></label>
-      <button class="chip" id="fsBtn" type="button">전체화면 켜기</button>
-      <label for="optLen1">1차 길이
-        <select id="optLen1"><option value="2">2초</option><option value="3">3초</option><option value="5">5초</option></select></label>
-      <label for="optLen2">2차 길이
-        <select id="optLen2"><option value="7">7초</option><option value="10">10초</option><option value="15">15초</option></select></label>
-      <span>노래는 매 판 랜덤으로 나오고, 전체를 한 바퀴 다 돌 때까지 같은 곡이 다시 안 나와요.</span>
+      <fieldset><legend>문제</legend>
+        <label for="optCount">한 판 문제 수 <input type="number" id="optCount" min="1" max="99" step="1"> 곡</label>
+        <div class="quick" id="countQuick"><button class="chip" type="button" data-v="3">3</button><button class="chip" type="button" data-v="5">5</button><button class="chip" type="button" data-v="10">10</button><button class="chip" type="button" data-v="0">전체</button></div>
+        <span class="note" id="countNote"></span>
+      </fieldset>
+      <fieldset><legend>듣기 길이</legend>
+        <label for="optLen1">1차 <input type="number" id="optLen1" min="0.5" max="15" step="0.5"> 초</label>
+        <label for="optLen2">2차 <input type="number" id="optLen2" min="2" max="60" step="1"> 초</label>
+        <span class="note">1차 0.5~15초 (0.5초 단위) · 2차는 1차보다 길게</span>
+      </fieldset>
+      <fieldset><legend>점수</legend>
+        <label for="optP1">1차 <input type="number" id="optP1" min="0" max="100" step="1"> 점</label>
+        <label for="optP2">2차 <input type="number" id="optP2" min="0" max="100" step="1"> 점</label>
+        <label for="optP3">초성 <input type="number" id="optP3" min="0" max="100" step="1"> 점</label>
+      </fieldset>
+      <fieldset><legend>화면</legend>
+        <button class="chip" id="fsBtn" type="button">전체화면 켜기</button>
+        <span class="note">F 키로도 켜고 꺼요</span>
+      </fieldset>
     </div>
+    <p class="note" style="margin:0 0 12px">노래는 매 판 랜덤으로 나오고, 전체를 한 바퀴 다 돌 때까지 같은 곡이 다시 안 나와요. 유튜브 링크나 음원 파일이 없는 곡은 자동으로 빠져요.</p>
     <div class="lbls"><span>#</span><span>가수</span><span>제목</span><span>힌트 (비우면 초성)</span><span>유튜브 링크</span><span>시작 (분:초)</span></div>
     <div class="list" id="list"></div>
     <p id="setupMsg" role="status"></p>
@@ -259,6 +276,7 @@ const store = {
 };
 let state = store.get() || {songs:DEFAULT_SONGS, count:5, len1:3, len2:10};
 state.len1=state.len1||3; state.len2=state.len2||state.len||10;
+if(state.p1==null) state.p1=3; if(state.p2==null) state.p2=2; if(state.p3==null) state.p3=1;
 { const byId=Object.fromEntries(DEFAULT_SONGS.map(d=>[d.id,d]));
   state.songs=(state.songs||[]).filter(s=>!(s.id==="d1"&&!s.yt));
   state.songs.forEach(s=>{ if(!s.yt && byId[s.id] && byId[s.id].yt) s.yt=byId[s.id].yt; });
@@ -563,9 +581,9 @@ function vinyl(){
 const $=id=>document.getElementById(id);
 const screens=["title","how","q","a","end"];
 let round=[], idx=0, correct=0, score=0, stage=1, clipSec=3, activeStage=0, hintOpen=false, current="title";
-function pts(){ return 4-stage; }
+function pts(){ return stage===1?state.p1:stage===2?state.p2:state.p3; }
 function renderStage(){
-  $("st1s").textContent=`${state.len1}초 · 3점`; $("st2s").textContent=`${state.len2}초 · 2점`;
+  $("st1s").textContent=`${state.len1}초 · ${state.p1}점`; $("st2s").textContent=`${state.len2}초 · ${state.p2}점`;
   $("st1").classList.toggle("used",stage>1); $("st2").classList.toggle("used",stage>2);
   $("points").innerHTML=`지금 맞히면 <b>${pts()}점</b>!`;
 }
@@ -597,14 +615,14 @@ async function buildRound(){
 }
 function howText(){
   const n=round.length;
-  $("howText").innerHTML=`요즘 차트 인기곡이 총 <b>${n}곡</b> 나와요!<br>1차는 <b>${state.len1}초</b>, 2차는 <b>${state.len2}초</b> 들려드려요.<br>1차에 맞히면 <b>3점</b> · 2차에 맞히면 <b>2점</b> · 초성 보고 맞히면 <b>1점</b>`;
+  $("howText").innerHTML=`요즘 차트 인기곡이 총 <b>${n}곡</b> 나와요!<br>1차는 <b>${state.len1}초</b>, 2차는 <b>${state.len2}초</b> 들려드려요.<br>1차에 맞히면 <b>${state.p1}점</b> · 2차에 맞히면 <b>${state.p2}점</b> · 초성 보고 맞히면 <b>${state.p3}점</b>`;
 }
-function renderBar(p){ const n=clipSec; const on=Math.round(p*n); $("bar").innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join(""); }
+function renderBar(p){ const n=Math.max(1,Math.ceil(clipSec)); const on=Math.round(p*n); $("bar").innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join(""); }
 
 async function showQ(){
   const s=round[idx]; hintOpen=false; stage=1; activeStage=0; clipSec=state.len1;
   $("qNum").textContent=idx+1;
-  const h=$("hint"); h.dataset.open="0"; h.textContent="초성 힌트 보기 (1점)";
+  const h=$("hint"); h.dataset.open="0"; h.textContent=`초성 힌트 보기 (${state.p3}점)`;
   renderBar(0); setPlayIcon(false); renderStage();
   show("q");
   const id=ytId(s.yt);
@@ -619,7 +637,7 @@ function chosung(t){ return String(t).split(/(\s+)/).map(w=>{ if(/^\s+$/.test(w)
     else if(/[A-Za-z]/.test(ch)){ out+= latin? "_" : ch.toUpperCase(); latin=1; }
     else { out+=ch; latin=0; } } return out; }).join(""); }
 function hintText(s){ return (s.hint&&s.hint.trim())? s.hint : chosung(s.title); }
-function toggleHint(){ const s=round[idx]; hintOpen=!hintOpen; const h=$("hint"); h.dataset.open=hintOpen?"1":"0"; h.textContent=hintOpen? "초성: "+hintText(s) : "초성 힌트 보기 (1점)"; if(hintOpen){ stage=3; renderStage(); } }
+function toggleHint(){ const s=round[idx]; hintOpen=!hintOpen; const h=$("hint"); h.dataset.open=hintOpen?"1":"0"; h.textContent=hintOpen? "초성: "+hintText(s) : `초성 힌트 보기 (${state.p3}점)`; if(hintOpen){ stage=3; renderStage(); } }
 async function showA(){
   const s=round[idx];
   $("aArtist").textContent=s.artist; $("aTitle").textContent=s.title;
@@ -632,7 +650,7 @@ async function showA(){
 function next(ok){ if(ok){ score+=pts(); correct++; } idx++; if(idx>=round.length) end(); else showQ(); }
 function end(){
   show("end");
-  const max=round.length*3;
+  const max=round.length*Math.max(state.p1,state.p2,state.p3);
   $("scoreText").innerHTML=`총 <b>${score}점</b> <small style="font-size:.55em;color:var(--lilac)">/ 만점 ${max}점 · ${correct}곡 정답</small>`;
   const r=max?score/max:0;
   $("scoreMsg").textContent = r===1?"전곡 1차 정답! 오늘의 절대음감 인정":r>=.7?"대단해요! 차트를 꿰고 있네요":r>=.4?"좋아요! 귀가 꽤 좋은데요?":"괜찮아요, 한 판 더 해볼까요?";
@@ -786,7 +804,8 @@ async function renderList(){
       </div>
     </div>`).join("");
 }
-$("list").addEventListener("input",e=>{ const row=e.target.closest(".song"); if(!row) return; const s=state.songs[+row.dataset.i]; const k=e.target.dataset.k; s[k]= k==="start"? parseT(e.target.value) : e.target.value; save(); });
+$("list").addEventListener("change",e=>{ if(e.target.dataset.k==="start"){ const row=e.target.closest(".song"); e.target.value=fmtT(state.songs[+row.dataset.i].start); } });
+$("list").addEventListener("input",e=>{ const row=e.target.closest(".song"); if(!row) return; const s=state.songs[+row.dataset.i]; const k=e.target.dataset.k; s[k]= k==="start"? parseT(e.target.value) : e.target.value; save(); if(k==="yt"||k==="title") syncOpts(); });
 $("list").addEventListener("click",e=>{
   const b=e.target.closest("[data-act]"); if(!b) return; const row=b.closest(".song"); const s=state.songs[+row.dataset.i];
   const act=b.dataset.act;
@@ -804,11 +823,22 @@ $("fileImg").onchange=async e=>{ const f=e.target.files[0]; if(f&&pickFor){ awai
 $("addBtn").onclick=()=>{ state.songs.push({id:"s"+Date.now().toString(36),artist:"",title:"",hint:"",yt:"",start:45}); save(); renderList().then(()=>{ const r=$("list").lastElementChild; r&&r.querySelector("input").focus(); }); };
 $("resetBtn").onclick=e=>{ const b=e.currentTarget; if(!b.dataset.confirm){ b.dataset.confirm="1"; b.textContent="한 번 더 누르면 초기화"; setTimeout(()=>{delete b.dataset.confirm; b.textContent="기본 목록으로";},2500); return; }
   delete b.dataset.confirm; b.textContent="기본 목록으로"; state.songs=JSON.parse(JSON.stringify(DEFAULT_SONGS)); state.bag=[]; save(); renderList(); };
-$("optCount").onchange=e=>{ state.count=+e.target.value; save(); };
-$("optLen1").onchange=e=>{ state.len1=+e.target.value; save(); };
-$("optLen2").onchange=e=>{ state.len2=+e.target.value; save(); };
+function clampNum(v,lo,hi,step){ v=parseFloat(v); if(!isFinite(v)) return null; v=Math.round(v/step)*step; return Math.min(hi,Math.max(lo,v)); }
+function playableCount(){ return state.songs.filter(s=>s.title.trim()&&(ytId(s.yt)||have.has("a:"+s.id))).length; }
+function syncOpts(){
+  const n=playableCount();
+  $("optCount").value = state.count>0? state.count : n;
+  $("countNote").textContent = `재생 가능한 곡 ${n}곡` + (state.count===0?" · 전체":"");
+  $("optLen1").value=state.len1; $("optLen2").value=state.len2;
+  $("optP1").value=state.p1; $("optP2").value=state.p2; $("optP3").value=state.p3;
+}
+$("optCount").onchange=e=>{ const v=clampNum(e.target.value,1,999,1); if(v==null){ msg("문제 수는 숫자로 적어주세요"); syncOpts(); return; } const n=playableCount(); state.count = v>=n?0:v; save(); syncOpts(); msg(""); };
+$("countQuick").onclick=e=>{ const b=e.target.closest("[data-v]"); if(!b) return; state.count=+b.dataset.v; save(); syncOpts(); };
+$("optLen1").onchange=e=>{ const v=clampNum(e.target.value,0.5,15,0.5); if(v==null){ syncOpts(); return; } state.len1=v; if(state.len2<=v){ state.len2=Math.min(60,Math.ceil(v)+2); msg(`2차는 1차보다 길어야 해서 2차를 ${state.len2}초로 바꿨어요`); } else msg(""); save(); syncOpts(); };
+$("optLen2").onchange=e=>{ const v=clampNum(e.target.value,2,60,1); if(v==null){ syncOpts(); return; } if(v<=state.len1){ msg(`2차는 1차(${state.len1}초)보다 길어야 해요`); syncOpts(); return; } state.len2=v; save(); syncOpts(); msg(""); };
+["P1","P2","P3"].forEach(k=>{ $("opt"+k).onchange=e=>{ const v=clampNum(e.target.value,0,100,1); if(v!=null){ state[k.toLowerCase()]=v; save(); } syncOpts(); }; });
 
-function openSetup(){ stopAudio(); $("optCount").value=String(state.count); $("optLen1").value=String(state.len1); $("optLen2").value=String(state.len2); renderList(); $("setup").hidden=false; $("closeSetup").focus(); }
+async function openSetup(){ stopAudio(); await renderList(); syncOpts(); $("setup").hidden=false; $("closeSetup").focus(); }
 $("setupBtn").onclick=openSetup;
 $("closeSetup").onclick=()=>{ stopAudio(); $("setupMsg").textContent=""; $("setup").hidden=true; show("title"); };
 $("setup").addEventListener("keydown",e=>{ if(e.key==="Escape") $("closeSetup").click(); });
