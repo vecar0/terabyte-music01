@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>앨범 사진 모음</title>
+<style>
+:root{--bg:#07052b;--panel:#120d45;--line:#3b2f8f;--ink:#fff;--sub:#b9a6ff;--gold:#ffe14d;--red:#e0304a;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;padding:24px max(16px,env(safe-area-inset-left)) 40px}
+h1{margin:0 0 6px;font-size:26px}
+p{margin:0 0 14px;color:var(--sub);line-height:1.6;font-size:14px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 18px}
+button,a.btn{font:inherit;font-size:14px;background:var(--red);color:#fff;border:0;padding:8px 14px;cursor:pointer;text-decoration:none;display:inline-block}
+button.sec,a.sec{background:#241c6b}
+#msg{color:var(--gold);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.card{background:var(--panel);border:2px solid var(--line);padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.art{aspect-ratio:1;width:100%;background:#0b0833;display:grid;place-items:center;overflow:hidden;color:var(--sub);font-size:12px;text-align:center}
+.art img{width:100%;height:100%;object-fit:cover}
+.t{font-size:14px;font-weight:700;overflow-wrap:anywhere}
+.a{font-size:12px;color:var(--sub);overflow-wrap:anywhere}
+.alb{font-size:11px;color:#8f84d0;overflow-wrap:anywhere}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.row a,.row button{font-size:12px;padding:6px 8px}
+</style>
+</head>
+<body>
+<h1>앨범 사진 모음</h1>
+<p>게임에 있는 노래들의 앨범 표지를 애플 뮤직(아이튠즈) 자료에서 자동으로 찾아요. "다운로드"를 누르면 1000×1000 크기로 저장돼요. 다운로드가 안 되면 새 탭에 이미지가 열리니 길게 누르거나 오른쪽 클릭해서 저장하세요. 표지가 틀리거나 안 나오면 "멜론에서 찾기"를 쓰세요.</p>
+<div class="bar">
+  <button id="putAll" type="button">찾은 앨범 사진 전부 게임에 넣기</button>
+  <a class="btn sec" href="./">게임으로 돌아가기</a>
+  <span id="msg" role="status"></span>
+</div>
+<div class="grid" id="grid"></div>
+<script>
+const DEFAULT_SONGS = [
+  {id:"d0",artist:"IVE",title:"BANG BANG",hint:"",yt:"https://www.youtube.com/watch?v=aIPeHMsiZnw",start:50},
+  {id:"d2",artist:"KiiiKiii",title:"404 (New Era)",hint:"",yt:"https://www.youtube.com/watch?v=eldqSNEAVSE",start:50},
+  {id:"d3",artist:"I.O.I",title:"갑자기",hint:"",yt:"https://www.youtube.com/watch?v=Jxgbfc89hNI",start:50},
+  {id:"d4",artist:"RESCENE",title:"LOVE ATTACK",hint:"",yt:"https://www.youtube.com/watch?v=9XttLI0oH0I",start:50},
+  {id:"d5",artist:"Hearts2Hearts",title:"RUDE!",hint:"",yt:"https://www.youtube.com/watch?v=F7sGJVUrkjQ",start:50},
+  {id:"d6",artist:"CORTIS",title:"REDRED",hint:"",yt:"https://www.youtube.com/watch?v=U6BDbXIah-Y",start:50},
+  {id:"d7",artist:"ILLIT",title:"It's Me",hint:"",yt:"https://www.youtube.com/watch?v=bMhDJ0S0OBA",start:50},
+  {id:"d8",artist:"한로로",title:"사랑하게 될 거야",hint:"",yt:"https://www.youtube.com/watch?v=h0KIWaUEIgQ",start:50},
+  {id:"d9",artist:"ROSÉ & Bruno Mars",title:"APT.",hint:"",yt:"https://www.youtube.com/watch?v=ekr2nIex040",start:50},
+  {id:"d10",artist:"WOODZ",title:"Drowning",hint:"",yt:"https://www.youtube.com/watch?v=YWJZfyxz-b0",start:50},
+  {id:"d11",artist:"AKMU",title:"소문의 낙원",hint:"",yt:"https://www.youtube.com/watch?v=OB8tiDObZ1I",start:50},
+  {id:"d12",artist:"NewJeans",title:"Hype Boy",hint:"",yt:"https://www.youtube.com/watch?v=11cta61wi0g",start:50},
+  {id:"d13",artist:"NewJeans",title:"Ditto",hint:"",yt:"https://www.youtube.com/watch?v=pSUydWEqKwE",start:50},
+  {id:"d14",artist:"IVE",title:"LOVE DIVE",hint:"",yt:"https://www.youtube.com/watch?v=8AMBslo1zng",start:50},
+  {id:"d15",artist:"IVE",title:"I AM",hint:"",yt:"https://www.youtube.com/watch?v=6ZUIwj3FgUY",start:50},
+  {id:"d16",artist:"aespa",title:"Supernova",hint:"",yt:"https://www.youtube.com/watch?v=Q4EfllhDBEI",start:50},
+  {id:"d17",artist:"aespa",title:"Whiplash",hint:"",yt:"https://www.youtube.com/watch?v=FWwqkXLxwFc",start:50},
+  {id:"d18",artist:"(여자)아이들",title:"퀸카 (Queencard)",hint:"",yt:"https://www.youtube.com/watch?v=7HDeem-JaSY",start:50},
+  {id:"d19",artist:"LE SSERAFIM",title:"ANTIFRAGILE",hint:"",yt:"https://www.youtube.com/watch?v=pyf8cbqyfPs",start:50},
+  {id:"d20",artist:"BLACKPINK",title:"뛰어 (JUMP)",hint:"",yt:"https://www.youtube.com/watch?v=CgCVZdcKcqY",start:50},
+  {id:"d21",artist:"G-DRAGON",title:"HOME SWEET HOME",hint:"",yt:"https://www.youtube.com/watch?v=fLi0EJfi_vg",start:50},
+  {id:"d22",artist:"이무진",title:"에피소드",hint:"",yt:"https://www.youtube.com/watch?v=PVIf531Dt8E",start:50},
+  {id:"d23",artist:"10CM",title:"너에게 닿기를",hint:"",yt:"https://www.youtube.com/watch?v=Ry1RrIVyl1M",start:50},
+  {id:"d24",artist:"JENNIE",title:"like JENNIE",hint:"",yt:"https://www.youtube.com/watch?v=JSFG-IE8n_c",start:50},
+  {id:"d25",artist:"NMIXX",title:"Blue Valentine",hint:"",yt:"https://www.youtube.com/watch?v=EmeW6li6bbo",start:50},
+  {id:"d26",artist:"DAY6",title:"한 페이지가 될 수 있게",hint:"",yt:"https://www.youtube.com/watch?v=vnS_jn2uibs",start:50},
+  {id:"d27",artist:"BTS",title:"SWIM",hint:"",yt:"https://www.youtube.com/watch?v=b4iVv91Z6lY",start:50},
+  {id:"d28",artist:"ILLIT",title:"Magnetic",hint:"",yt:"https://www.youtube.com/watch?v=Vk5-c_v4gMU",start:50},
+  {id:"d29",artist:"BTS",title:"Dynamite",hint:"",yt:"https://www.youtube.com/watch?v=gdZLi9oWNZg",start:50},
+  {id:"d30",artist:"아이유",title:"밤편지",hint:"",yt:"https://www.youtube.com/watch?v=BzYnNdJhZQw",start:50}
+];
+let songs=DEFAULT_SONGS;
+try{ const st=JSON.parse(localStorage.getItem("songquiz.v2")||"null"); if(st&&Array.isArray(st.songs)&&st.songs.length) songs=st.songs; }catch(e){}
+songs=songs.filter(s=>(s.title||"").trim());
+const found={};
+const norm=t=>String(t).toLowerCase().replace(/[^a-z0-9가-힣]/g,"");
+function jsonp(url){ return new Promise((res)=>{ const cb="cb"+Math.random().toString(36).slice(2); const sc=document.createElement("script"); const t=setTimeout(()=>{ cleanup(); res(null); },10000);
+  function cleanup(){ clearTimeout(t); delete window[cb]; sc.remove(); }
+  window[cb]=d=>{ cleanup(); res(d); }; sc.onerror=()=>{ cleanup(); res(null); }; sc.src=url+"&callback="+cb; document.head.appendChild(sc); }); }
+async function look(s){
+  const term=encodeURIComponent((s.artist+" "+s.title.replace(/\(.*?\)/g,"")).trim());
+  for(const c of ["kr","us"]){
+    const d=await jsonp(`https://itunes.apple.com/search?term=${term}&entity=song&country=${c}&limit=10`);
+    const r=d&&d.results||[]; if(!r.length) continue;
+    const ta=norm(s.title.replace(/\(.*?\)/g,"")), aa=norm(s.artist);
+    const best=r.find(x=>norm(x.trackName).includes(ta)&&(norm(x.artistName).includes(aa.slice(0,4))||aa.includes(norm(x.artistName).slice(0,4))))||r.find(x=>norm(x.trackName).includes(ta))||null;
+    if(best&&best.artworkUrl100) return {url:best.artworkUrl100.replace(/\/\d+x\d+bb\./,"/1000x1000bb."), album:best.collectionName};
+  }
+  return null;
+}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const grid=document.getElementById("grid");
+grid.innerHTML=songs.map((s,i)=>`<div class="card" id="c${i}">
+  <div class="art" id="art${i}">찾는 중…</div>
+  <div class="t">${esc(s.title)}</div><div class="a">${esc(s.artist)}</div><div class="alb" id="alb${i}"></div>
+  <div class="row">
+    <button type="button" data-dl="${i}" hidden>다운로드</button>
+    <a class="sec" target="_blank" rel="noopener" id="open${i}" hidden>새 탭에서 열기</a>
+    <a class="sec" target="_blank" rel="noopener" href="https://www.melon.com/search/total/index.htm?q=${encodeURIComponent(s.artist+" "+s.title)}">멜론에서 찾기</a>
+  </div></div>`).join("");
+(async()=>{
+  let ok=0;
+  for(let i=0;i<songs.length;i++){
+    const r=await look(songs[i]); const art=document.getElementById("art"+i);
+    if(r){ ok++; found[i]=r; art.innerHTML=`<img alt="${esc(songs[i].title)} 앨범 표지" src="${r.url}">`; document.getElementById("alb"+i).textContent="앨범: "+r.album;
+      document.querySelector(`[data-dl="${i}"]`).hidden=false; const o=document.getElementById("open"+i); o.href=r.url; o.hidden=false; }
+    else art.textContent="자동으로 못 찾았어요 · 멜론에서 찾기를 눌러주세요";
+    document.getElementById("msg").textContent=`${i+1}/${songs.length}곡 확인 · ${ok}곡 찾음`;
+  }
+})();
+grid.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-dl]"); if(!b) return; const i=+b.dataset.dl, r=found[i], s=songs[i];
+  const name=(s.artist+" - "+s.title).replace(/[\\/:*?"<>|]/g,"")+".jpg";
+  try{ const blob=await (await fetch(r.url)).blob(); const u=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(u),4000); }
+  catch(err){ window.open(r.url,"_blank","noopener"); }
+});
+document.getElementById("putAll").onclick=()=>{
+  try{
+    const st=JSON.parse(localStorage.getItem("songquiz.v2")||"null")||{songs:DEFAULT_SONGS,count:5,len1:3,len2:10};
+    let n=0; st.songs.forEach(x=>{ const i=songs.findIndex(s=>s.id===x.id); if(i>=0&&found[i]){ x.cover=found[i].url; n++; } });
+    localStorage.setItem("songquiz.v2",JSON.stringify(st));
+    document.getElementById("msg").textContent=`${n}곡의 앨범 사진을 게임에 넣었어요. 게임 정답 화면에 표지가 나와요.`;
+  }catch(e){ document.getElementById("msg").textContent="게임에 넣지 못했어요. 시크릿 창이면 일반 창에서 다시 해주세요."; }
+};
+</script>
+</body>
+</html>

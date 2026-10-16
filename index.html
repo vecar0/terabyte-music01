@@ -221,6 +221,7 @@ a.chip{text-decoration:none;display:inline-block}
         <button class="chip" id="addBtn" type="button">+ 노래 추가</button>
       </div>
       <div class="row">
+        <a class="chip" href="covers.html" target="_blank" rel="noopener">앨범 사진 모음</a>
         <button class="chip" id="resetBtn" type="button">기본 목록으로</button>
         <button class="btn" id="closeSetup" type="button">완료</button>
       </div>
@@ -283,6 +284,7 @@ if(state.p1==null) state.p1=3; if(state.p2==null) state.p2=2; if(state.p3==null)
 if(!state.chosungV){ (state.songs||[]).forEach(s=>{ if(OLD_HINTS.has(s.hint)) s.hint=""; }); state.chosungV=1; }
 if(!state.songs) state.songs = DEFAULT_SONGS;
 const save = () => store.set(state);
+window.addEventListener("storage",e=>{ if(e.key!==LS) return; const n=store.get(); if(!n||!n.songs) return; const m=Object.fromEntries(n.songs.map(x=>[x.id,x])); state.songs.forEach(x=>{ if(m[x.id]&&m[x.id].cover) x.cover=m[x.id].cover; }); });
 
 /* IndexedDB for audio/image blobs */
 let dbp = null;
@@ -634,7 +636,8 @@ async function showQ(){
   renderBar(0); setPlayIcon(false); renderStage();
   show("q");
   const id=ytId(s.yt);
-  if(id){ ytCue(id,s.start); (new Image()).src=`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`; }
+  if(id){ ytCue(id,s.start); }
+  (new Image()).src = s.cover || (id?`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`:"");
   const f=id?null:await getFile("a:"+s.id);
   $("status").textContent = (id||f)? "1차 듣기를 누르면 노래가 짧게 나와요" : "이 노래는 유튜브 링크가 없어요 · 오른쪽 위 '노래 설정'에서 넣어주세요";
 }
@@ -653,6 +656,7 @@ async function showA(){
   const img=await getFile("i:"+s.id);
   const id=ytId(s.yt);
   if(img){ const el=new Image(); el.alt=s.artist; el.src=URL.createObjectURL(img); cov.appendChild(el); }
+  else if(s.cover){ const el=new Image(); el.alt=s.title+" 앨범 표지"; el.referrerPolicy="no-referrer"; el.onerror=()=>el.replaceWith(id?thumb(id,s.artist):vinyl()); el.src=s.cover; cov.appendChild(el); }
   else if(id){ cov.appendChild(thumb(id,s.artist)); }
   else cov.appendChild(vinyl());
   $("rightBtn").textContent=`맞혔어요 +${pts()}점`;
