@@ -25,7 +25,7 @@ body{background:var(--night);color:var(--ink);font-family:var(--pixel);overflow:
   text-shadow:4px 0 0 var(--red),-4px 0 0 var(--red),0 4px 0 var(--red),0 -4px 0 var(--red),4px 4px 0 var(--red),-4px 4px 0 var(--red),4px -4px 0 var(--red),-4px -4px 0 var(--red),0 10px 0 var(--red-lo)}
 .h2{font-size:clamp(30px,5.6vw,72px);line-height:1.15;margin:0;text-wrap:balance;
   text-shadow:3px 0 0 var(--red),-3px 0 0 var(--red),0 3px 0 var(--red),0 -3px 0 var(--red),3px 3px 0 var(--red),-3px 3px 0 var(--red),3px -3px 0 var(--red),-3px -3px 0 var(--red)}
-.body{font-size:clamp(15px,1.8vw,22px);line-height:1.9;margin:0;max-width:40ch}
+.body{font-size:clamp(15px,1.8vw,22px);line-height:1.9;margin:0;max-width:48ch}
 .body b{color:var(--gold);font-weight:400}
 .btn{font-family:var(--pixel);font-size:clamp(15px,1.7vw,20px);color:var(--ink);background:var(--red);border:0;padding:.55em 1.1em;cursor:pointer;
   box-shadow:0 4px 0 var(--red-lo);transition:transform .06s,background .1s}
@@ -42,6 +42,14 @@ body{background:var(--night);color:var(--ink);font-family:var(--pixel);overflow:
 .bubble[data-open="0"]{background:transparent;box-shadow:inset 0 0 0 3px var(--red);color:#ffd0d7}
 .bubble[data-open="0"]::after{border-top-color:var(--red)}
 .player{display:flex;flex-direction:column;align-items:center;gap:10px}
+.stages{gap:16px}
+.lis{font-family:var(--pixel);font-size:clamp(16px,2vw,24px);color:#07052b;background:var(--gold);border:0;padding:.6em 1.1em;cursor:pointer;box-shadow:0 5px 0 #a4881b;display:flex;flex-direction:column;align-items:center;gap:4px}
+.lis small{font-size:.62em;color:#5a4410}
+.lis:active{transform:translateY(3px);box-shadow:0 2px 0 #a4881b}
+.lis.used{background:#b8a24a;box-shadow:0 5px 0 #6e5f1f}
+.lis:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.points{font-size:clamp(18px,2.2vw,28px);margin:0}
+.points b{color:var(--gold);font-weight:400}
 .play{width:clamp(70px,8vw,96px);aspect-ratio:1;max-width:100%;background:var(--gold);border:0;cursor:pointer;display:grid;place-items:center;box-shadow:0 5px 0 #a4881b}
 .play:active{transform:translateY(3px);box-shadow:0 2px 0 #a4881b}
 .play svg{width:46%;height:46%}
@@ -109,7 +117,7 @@ a.chip{text-decoration:none;display:inline-block}
   <section class="screen" id="s-how" hidden>
     <h2 class="h2">하는 방법</h2>
     <p class="body" id="howText"></p>
-    <p class="body">못 맞히겠으면 <b>힌트</b>를 눌러보세요!</p>
+    <p class="body">빨리 맞힐수록 점수가 높아요!</p>
     <button class="btn" id="goBtn" type="button">문제 시작</button>
   </section>
 
@@ -117,11 +125,15 @@ a.chip{text-decoration:none;display:inline-block}
     <span class="num" id="qNum">1</span>
     <h2 class="h2">이 노래의 제목은 무엇일까요?</h2>
     <div class="player">
-      <button class="play" id="playBtn" type="button" aria-label="하이라이트 재생"><svg viewBox="0 0 8 8" shape-rendering="crispEdges"><path id="playIcon" fill="#07052b" d="M2 1h1v6h-1z M3 2h1v4h-1z M4 3h1v2h-1z"/></svg></button>
+      <div class="row stages">
+        <button class="lis" id="st1" type="button"><span id="st1l">▶ 1차 듣기</span><small id="st1s"></small></button>
+        <button class="lis" id="st2" type="button"><span id="st2l">▶ 2차 듣기</span><small id="st2s"></small></button>
+      </div>
       <div class="bar" id="bar"></div>
+      <p class="points" id="points"></p>
       <p class="status" id="status"></p>
     </div>
-    <button class="bubble" id="hint" type="button" data-open="0">초성 힌트 보기</button>
+    <button class="bubble" id="hint" type="button" data-open="0">초성 힌트 보기 (1점)</button>
     <div class="row" style="margin-top:14px">
       <button class="btn ghost" id="revealBtn" type="button">정답 공개</button>
     </div>
@@ -137,18 +149,20 @@ a.chip{text-decoration:none;display:inline-block}
     </div>
     <div class="row" style="margin-top:8px">
       <button class="btn ghost" id="againBtn" type="button">다시 듣기</button>
-      <button class="btn" id="nextBtn" type="button">다음 문제</button>
+      <button class="btn ok" id="rightBtn" type="button">맞혔어요 +3점</button>
+      <button class="btn" id="wrongBtn" type="button">못 맞혔어요</button>
     </div>
   </section>
 
   <section class="screen" id="s-end" hidden>
     <h2 class="h2">게임 끝!</h2>
     <p class="score" id="scoreText"></p>
+    <p class="body" id="scoreMsg"></p>
     <button class="btn" id="homeBtn" type="button">처음으로</button>
   </section>
 </main>
 
-<div class="keys" id="keys">스페이스 재생 · H 초성 · 엔터 정답/다음 · F 전체화면</div>
+<div class="keys" id="keys">1 · 2 듣기 · H 초성 · 엔터 정답 · O 맞힘 · X 못 맞힘 · F 전체화면</div>
 
 <div class="setup" id="setup" hidden role="dialog" aria-labelledby="setupTitle">
   <div class="panel">
@@ -157,8 +171,10 @@ a.chip{text-decoration:none;display:inline-block}
     <div class="opts">
       <label for="optCount">한 판 문제 수
         <select id="optCount"><option value="0">전체</option><option value="3">3곡</option><option value="5">5곡</option><option value="10">10곡</option></select></label>
-      <label for="optLen">재생 길이
-        <select id="optLen"><option value="5">5초</option><option value="7">7초</option><option value="10">10초</option><option value="15">15초</option></select></label>
+      <label for="optLen1">1차 길이
+        <select id="optLen1"><option value="2">2초</option><option value="3">3초</option><option value="5">5초</option></select></label>
+      <label for="optLen2">2차 길이
+        <select id="optLen2"><option value="7">7초</option><option value="10">10초</option><option value="15">15초</option></select></label>
       <span>노래는 매 판 랜덤으로 나오고, 전체를 한 바퀴 다 돌 때까지 같은 곡이 다시 안 나와요.</span>
     </div>
     <div class="lbls"><span>#</span><span>가수</span><span>제목</span><span>힌트 (비우면 초성)</span><span>유튜브 링크</span><span>시작 (분:초)</span></div>
@@ -219,7 +235,8 @@ const store = {
   get(){ try{ return JSON.parse(localStorage.getItem(LS)||"null"); }catch(e){ return null; } },
   set(v){ try{ localStorage.setItem(LS,JSON.stringify(v)); }catch(e){} }
 };
-let state = store.get() || {songs:DEFAULT_SONGS, count:5, len:10, shuffle:true};
+let state = store.get() || {songs:DEFAULT_SONGS, count:5, len1:3, len2:10};
+state.len1=state.len1||3; state.len2=state.len2||state.len||10;
 { const byId=Object.fromEntries(DEFAULT_SONGS.map(d=>[d.id,d]));
   state.songs=(state.songs||[]).filter(s=>!(s.id==="d1"&&!s.yt));
   state.songs.forEach(s=>{ if(!s.yt && byId[s.id] && byId[s.id].yt) s.yt=byId[s.id].yt; });
@@ -523,13 +540,20 @@ function vinyl(){
 /* ---------------- game ---------------- */
 const $=id=>document.getElementById(id);
 const screens=["title","how","q","a","end"];
-let round=[], idx=0, correct=0, hintOpen=false, current="title";
+let round=[], idx=0, correct=0, score=0, stage=1, clipSec=3, activeStage=0, hintOpen=false, current="title";
+function pts(){ return 4-stage; }
+function renderStage(){
+  $("st1s").textContent=`${state.len1}초 · 3점`; $("st2s").textContent=`${state.len2}초 · 2점`;
+  $("st1").classList.toggle("used",stage>1); $("st2").classList.toggle("used",stage>2);
+  $("points").innerHTML=`지금 맞히면 <b>${pts()}점</b>!`;
+}
+function setPlayIcon(on){ $("st1l").textContent=(on&&activeStage===1)?"■ 멈추기":"▶ 1차 듣기"; $("st2l").textContent=(on&&activeStage===2)?"■ 멈추기":"▶ 2차 듣기"; }
 function show(name){
   current=name; stopAudio();
   screens.forEach(s=>$("s-"+s).hidden = s!==name);
   scene = name==="title"?"title":name==="how"?"how":name==="q"?"q":"a";
   $("counter").hidden = !(name==="q"||name==="a");
-  if(!$("counter").hidden) $("counter").textContent = `${idx+1} / ${round.length}`;
+  if(!$("counter").hidden) $("counter").textContent = `${idx+1} / ${round.length}  ·  ${score}점`;
   draw(performance.now());
 }
 function shuffled(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -547,24 +571,24 @@ async function buildRound(){
   }
   state.bag=bag; save();
   const byId=Object.fromEntries(ok.map(s=>[s.id,s]));
-  round=pick.map(id=>byId[id]); idx=0; correct=0;
+  round=pick.map(id=>byId[id]); idx=0; correct=0; score=0;
 }
 function howText(){
   const n=round.length;
-  $("howText").innerHTML=`요즘 차트 인기곡이 총 <b>${n}곡</b> 재생됩니다!<br>짧게 재생되는 <b>${state.len}초</b> 구간을 듣고서 정답을 외쳐주세요!`;
+  $("howText").innerHTML=`요즘 차트 인기곡이 총 <b>${n}곡</b> 나와요!<br>1차는 <b>${state.len1}초</b>, 2차는 <b>${state.len2}초</b> 들려드려요.<br>1차에 맞히면 <b>3점</b> · 2차에 맞히면 <b>2점</b> · 초성 보고 맞히면 <b>1점</b>`;
 }
-function renderBar(p){ const n=state.len; const on=Math.round(p*n); $("bar").innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join(""); }
-function setPlayIcon(playing){ $("playIcon").setAttribute("d", playing? "M2 2h1v4h-1z M5 2h1v4h-1z" : "M2 1h1v6h-1z M3 2h1v4h-1z M4 3h1v2h-1z"); $("playBtn").setAttribute("aria-label",playing?"멈추기":"하이라이트 재생"); }
+function renderBar(p){ const n=clipSec; const on=Math.round(p*n); $("bar").innerHTML=Array.from({length:n},(_,i)=>`<i class="${i<on?"on":""}"></i>`).join(""); }
+
 async function showQ(){
-  const s=round[idx]; hintOpen=false;
+  const s=round[idx]; hintOpen=false; stage=1; activeStage=0; clipSec=state.len1;
   $("qNum").textContent=idx+1;
-  const h=$("hint"); h.dataset.open="0"; h.textContent="초성 힌트 보기";
-  renderBar(0); setPlayIcon(false);
+  const h=$("hint"); h.dataset.open="0"; h.textContent="초성 힌트 보기 (1점)";
+  renderBar(0); setPlayIcon(false); renderStage();
   show("q");
   const id=ytId(s.yt);
   if(id) ytCue(id,s.start);
   const f=id?null:await getFile("a:"+s.id);
-  $("status").textContent = (id||f)? "재생 버튼(스페이스)을 누르면 노래가 나와요" : "이 노래는 유튜브 링크가 없어요 · 오른쪽 위 '노래 설정'에서 넣어주세요";
+  $("status").textContent = (id||f)? "1차 듣기를 누르면 노래가 짧게 나와요" : "이 노래는 유튜브 링크가 없어요 · 오른쪽 위 '노래 설정'에서 넣어주세요";
 }
 const CHO="ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ";
 function chosung(t){ return String(t).split(/(\s+)/).map(w=>{ if(/^\s+$/.test(w)) return "  ";
@@ -573,19 +597,23 @@ function chosung(t){ return String(t).split(/(\s+)/).map(w=>{ if(/^\s+$/.test(w)
     else if(/[A-Za-z]/.test(ch)){ out+= latin? "_" : ch.toUpperCase(); latin=1; }
     else { out+=ch; latin=0; } } return out; }).join(""); }
 function hintText(s){ return (s.hint&&s.hint.trim())? s.hint : chosung(s.title); }
-function toggleHint(){ const s=round[idx]; hintOpen=!hintOpen; const h=$("hint"); h.dataset.open=hintOpen?"1":"0"; h.textContent=hintOpen? "초성: "+hintText(s) : "초성 힌트 보기"; }
+function toggleHint(){ const s=round[idx]; hintOpen=!hintOpen; const h=$("hint"); h.dataset.open=hintOpen?"1":"0"; h.textContent=hintOpen? "초성: "+hintText(s) : "초성 힌트 보기 (1점)"; if(hintOpen){ stage=3; renderStage(); } }
 async function showA(){
   const s=round[idx];
   $("aArtist").textContent=s.artist; $("aTitle").textContent=s.title;
   const cov=$("cover"); cov.innerHTML="";
   const img=await getFile("i:"+s.id);
   if(img){ const el=new Image(); el.alt=s.artist; el.src=URL.createObjectURL(img); cov.appendChild(el); } else cov.appendChild(vinyl());
+  $("rightBtn").textContent=`맞혔어요 +${pts()}점`;
   show("a");
 }
-function next(){ idx++; if(idx>=round.length) end(); else showQ(); }
+function next(ok){ if(ok){ score+=pts(); correct++; } idx++; if(idx>=round.length) end(); else showQ(); }
 function end(){
   show("end");
-  $("scoreText").textContent=`${round.length}곡 모두 끝! 참여해 주셔서 고마워요`;
+  const max=round.length*3;
+  $("scoreText").innerHTML=`총 <b>${score}점</b> <small style="font-size:.55em;color:var(--lilac)">/ 만점 ${max}점 · ${correct}곡 정답</small>`;
+  const r=max?score/max:0;
+  $("scoreMsg").textContent = r===1?"전곡 1차 정답! 오늘의 절대음감 인정":r>=.7?"대단해요! 차트를 꿰고 있네요":r>=.4?"좋아요! 귀가 꽤 좋은데요?":"괜찮아요, 한 판 더 해볼까요?";
 }
 
 /* audio: YouTube first, local file as fallback */
@@ -609,7 +637,7 @@ const audio=new Audio(); let stopT=null, raf=null, playing=false, url=null, urlK
 function stopAudio(){ clearTimeout(stopT); clearInterval(poll); cancelAnimationFrame(raf); audio.pause(); if(ytReady){ try{ yt.pauseVideo(); }catch(e){} } playing=false; setPlayIcon(false); }
 function runTimer(onProgress, setVol){
   playing=true; setPlayIcon(true);
-  const len=state.len*1000, t0=performance.now();
+  const len=clipSec*1000, t0=performance.now();
   const tick=()=>{ const p=Math.min(1,(performance.now()-t0)/len); onProgress&&onProgress(p);
     if(p>.94) setVol(Math.max(0,(1-p)/.06));
     if(p<1&&playing) raf=requestAnimationFrame(tick); };
@@ -648,24 +676,35 @@ async function playClip(s, onProgress){
   }catch(e){ msg("재생이 막혔어요. 버튼을 한 번 더 눌러주세요"); return; }
   runTimer(onProgress,v=>{ audio.volume=v; });
 }
-function playToggle(){ if(playing){ stopAudio(); $("status").textContent="멈췄어요"; return; } playClip(round[idx],renderBar); }
+function playStage(n){
+  if(playing && activeStage===n){ stopAudio(); $("status").textContent="멈췄어요"; return; }
+  if(n===2 && stage<2){ stage=2; }
+  activeStage=n; clipSec=n===1?state.len1:state.len2; renderStage(); renderBar(0);
+  playClip(round[idx],renderBar);
+}
 
 /* wiring */
 $("startBtn").onclick=async()=>{ await buildRound(); howText(); show("how"); };
 $("goBtn").onclick=()=>{ if(!round.length){ $("howText").textContent="노래 목록이 비어 있어요. '노래 설정'에서 추가해 주세요."; return; } showQ(); };
-$("playBtn").onclick=playToggle;
+$("st1").onclick=()=>playStage(1);
+$("st2").onclick=()=>playStage(2);
 $("hint").onclick=toggleHint;
 $("revealBtn").onclick=showA;
-$("againBtn").onclick=()=>{ if(playing) stopAudio(); else playClip(round[idx]); };
-$("nextBtn").onclick=()=>next();
+$("againBtn").onclick=()=>{ if(playing) stopAudio(); else { activeStage=0; clipSec=state.len2; playClip(round[idx]); } };
+$("rightBtn").onclick=()=>next(true);
+$("wrongBtn").onclick=()=>next(false);
 $("homeBtn").onclick=()=>show("title");
 $("fsBtn").onclick=()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(()=>{}); }catch(e){} };
 document.addEventListener("fullscreenchange",()=>{ $("fsBtn").textContent=document.fullscreenElement?"전체화면 끄기":"전체화면"; });
 document.addEventListener("keydown",e=>{
   if(!$("setup").hidden || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-  if(e.code==="Space"){ e.preventDefault(); if(current==="q") playToggle(); else if(current==="a") $("againBtn").click(); }
+  if(e.code==="Space"){ e.preventDefault(); if(current==="q") playStage(stage>1||activeStage===1?2:1); else if(current==="a") $("againBtn").click(); }
+  else if(e.key==="1"&&current==="q") playStage(1);
+  else if(e.key==="2"&&current==="q") playStage(2);
+  else if(current==="a"&&(e.key==="o"||e.key==="O"||e.key==="ㅐ")) next(true);
+  else if(current==="a"&&(e.key==="x"||e.key==="X"||e.key==="ㅌ")) next(false);
   else if(e.key==="h"||e.key==="H"||e.key==="ㅗ"){ if(current==="q") toggleHint(); }
-  else if(e.key==="Enter"){ e.preventDefault(); if(current==="title") $("startBtn").click(); else if(current==="how") $("goBtn").click(); else if(current==="q") showA(); else if(current==="a") next(); else if(current==="end") show("title"); }
+  else if(e.key==="Enter"){ e.preventDefault(); if(current==="title") $("startBtn").click(); else if(current==="how") $("goBtn").click(); else if(current==="q") showA(); else if(current==="end") show("title"); }
   else if(e.key==="f"||e.key==="F"||e.key==="ㄹ"){ $("fsBtn").click(); }
   else if(e.key==="Escape" && !document.fullscreenElement){ show("title"); }
 });
@@ -700,7 +739,7 @@ $("list").addEventListener("click",e=>{
   const act=b.dataset.act;
   if(act==="audio"){ pickFor=s; $("fileAudio").value=""; $("fileAudio").click(); }
   else if(act==="img"){ pickFor=s; $("fileImg").value=""; $("fileImg").click(); }
-  else if(act==="test"){ if(playing&&b.textContent==="멈추기"){ stopAudio(); b.textContent="미리 듣기"; msg(""); return; } $("list").querySelectorAll('[data-act="test"]').forEach(x=>x.textContent="미리 듣기"); b.textContent="멈추기"; playClip(s,p=>{ if(p>=1) b.textContent="미리 듣기"; }); }
+  else if(act==="test"){ if(playing&&b.textContent==="멈추기"){ stopAudio(); b.textContent="미리 듣기"; msg(""); return; } $("list").querySelectorAll('[data-act="test"]').forEach(x=>x.textContent="미리 듣기"); b.textContent="멈추기"; activeStage=0; clipSec=state.len2; playClip(s,p=>{ if(p>=1) b.textContent="미리 듣기"; }); }
   else if(act==="del"){
     if(b.dataset.confirm){ delFile("a:"+s.id); delFile("i:"+s.id); state.songs.splice(+row.dataset.i,1); save(); renderList(); }
     else { b.dataset.confirm="1"; b.textContent="정말 삭제?"; setTimeout(()=>{ if(b.isConnected){ delete b.dataset.confirm; b.textContent="삭제"; } },2500); }
@@ -712,9 +751,10 @@ $("addBtn").onclick=()=>{ state.songs.push({id:"s"+Date.now().toString(36),artis
 $("resetBtn").onclick=e=>{ const b=e.currentTarget; if(!b.dataset.confirm){ b.dataset.confirm="1"; b.textContent="한 번 더 누르면 초기화"; setTimeout(()=>{delete b.dataset.confirm; b.textContent="기본 목록으로";},2500); return; }
   delete b.dataset.confirm; b.textContent="기본 목록으로"; state.songs=JSON.parse(JSON.stringify(DEFAULT_SONGS)); state.bag=[]; save(); renderList(); };
 $("optCount").onchange=e=>{ state.count=+e.target.value; save(); };
-$("optLen").onchange=e=>{ state.len=+e.target.value; save(); };
+$("optLen1").onchange=e=>{ state.len1=+e.target.value; save(); };
+$("optLen2").onchange=e=>{ state.len2=+e.target.value; save(); };
 
-function openSetup(){ stopAudio(); $("optCount").value=String(state.count); $("optLen").value=String(state.len); renderList(); $("setup").hidden=false; $("closeSetup").focus(); }
+function openSetup(){ stopAudio(); $("optCount").value=String(state.count); $("optLen1").value=String(state.len1); $("optLen2").value=String(state.len2); renderList(); $("setup").hidden=false; $("closeSetup").focus(); }
 $("setupBtn").onclick=openSetup;
 $("closeSetup").onclick=()=>{ stopAudio(); $("setupMsg").textContent=""; $("setup").hidden=true; show("title"); };
 $("setup").addEventListener("keydown",e=>{ if(e.key==="Escape") $("closeSetup").click(); });
